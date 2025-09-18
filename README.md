@@ -1,1 +1,1 @@
-Big Up Claude AI For this website
+First Website I Actually Locked in and stuff the only thing i didnt do was the star background
