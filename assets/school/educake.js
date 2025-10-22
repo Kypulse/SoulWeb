@@ -142,22 +142,25 @@
                 continue;
             }
 
-            // Check if it's a text question
-            const isTextQuestion = $('input[name="answer"]').length > 0;
+            // UPDATED: Check if it's a text question using the new selector
+            const isTextQuestion = $('input.answer-text').length > 0;
 
             if (isTextQuestion) {
                 updateAnswerBox(`Q${currentQNum} (Text): Typing answer...`);
-                const textBox = $('input[name="answer"]');
+                // UPDATED: Use the new selector for text input
+                const textBox = $('input.answer-text');
                 if (textBox.length > 0) {
                     textBox.val(currentAnswer);
                     textBox[0].dispatchEvent(new Event('input', { bubbles: true }));
                     console.log(`Typed answer "${currentAnswer}" into text box.`);
                     
+                    // UPDATED: Use more specific selectors for buttons
                     let submitButtonClicked = false;
                     const selectors = [
-                        'button.btn.green:contains("Submit")',
-                        'button[class*="green"]:contains("Submit")',
-                        'button:contains("Submit")'
+                        'button:contains("Submit")',
+                        'button.btn:contains("Submit")',
+                        'button[class*="submit"]:contains("Submit")',
+                        'button[type="submit"]'
                     ];
                     for (const selector of selectors) {
                         try {
@@ -175,8 +178,9 @@
                     if (submitButtonClicked) {
                         await new Promise(r => setTimeout(r, 500));
                         try {
-                            await waitForElement('button.btn.blue:contains("Next question")', 3000);
-                            const nextQuestionButton = $('button.btn.blue:contains("Next question")');
+                            // UPDATED: More specific selector for next button
+                            await waitForElement('button:contains("Next question"), button:contains("Next")', 3000);
+                            const nextQuestionButton = $('button:contains("Next question"), button:contains("Next")');
                             if (nextQuestionButton.length > 0) {
                                 nextQuestionButton.click();
                                 console.log("Text: Clicked 'Next question' button after text submit.");
@@ -204,9 +208,10 @@
                 // 1. Click the "Submit" button
                 let submitButtonClicked = false;
                 const selectors = [
-                    'button.btn.green:contains("Submit")',
-                    'button[class*="green"]:contains("Submit")',
-                    'button:contains("Submit")'
+                    'button:contains("Submit")',
+                    'button.btn:contains("Submit")',
+                    'button[class*="submit"]:contains("Submit")',
+                    'button[type="submit"]'
                 ];
                 for (const selector of selectors) {
                     try {
@@ -225,8 +230,8 @@
                     // 2. On the review screen, click the "Next" arrow
                     await new Promise(r => setTimeout(r, 500));
                     try {
-                        await waitForElement('.arrow-right:not([disabled])', 3000);
-                        const nextArrow = $('.arrow-right');
+                        await waitForElement('.arrow-right:not([disabled]), button:contains("Next")', 3000);
+                        const nextArrow = $('.arrow-right:not([disabled]), button:contains("Next")');
                         if (nextArrow.length > 0) nextArrow.click();
                         console.log("MCQ: Clicked next arrow.");
                     } catch (e) { console.warn("MCQ: Could not find next arrow."); }
@@ -234,8 +239,8 @@
                     // 3. On the transition screen, click the "Next question" button
                     await new Promise(r => setTimeout(r, 500));
                     try {
-                        await waitForElement('button.btn.blue:contains("Next question")', 3000);
-                        const nextQuestionButton = $('button.btn.blue:contains("Next question")');
+                        await waitForElement('button:contains("Next question"), button:contains("Next")', 3000);
+                        const nextQuestionButton = $('button:contains("Next question"), button:contains("Next")');
                         if (nextQuestionButton.length > 0) nextQuestionButton.click();
                         console.log("MCQ: Clicked 'Next question' button.");
                     } catch (e) { console.warn("MCQ: Could not find 'Next question' button."); }
@@ -250,12 +255,12 @@
 
         updateAnswerBox("All questions answered. Submitting quiz...");
         try {
-            const submitButton = await waitForElement('button.btn.green:not([disabled])', 5000);
+            const submitButton = await waitForElement('button:contains("Submit quiz"), button:contains("Submit"), button.btn.green:not([disabled])', 5000);
             if (submitButton.innerText.toLowerCase().includes('submit')) {
                 submitButton.click();
                 updateAnswerBox("Quiz submitted successfully!");
             } else {
-                throw new Error("Found a green button, but it wasn't the 'Submit' button.");
+                throw new Error("Found a button, but it wasn't the 'Submit' button.");
             }
         } catch (error) {
             console.error("Submit Error:", error);
